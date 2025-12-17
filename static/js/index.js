@@ -31,16 +31,19 @@ function getNetdiskColorClass(netdiskName) {
     let badgeTextClass = 'text-white';
 
     // 映射规则：
-    if (netdiskName.includes('百度网盘')) badgeClass = 'bg-primary';
-    else if (netdiskName.includes('阿里云盘')) badgeClass = 'bg-info';
-    else if (netdiskName.includes('夸克网盘')) { badgeClass = 'bg-warning'; badgeTextClass = 'text-dark'; }
-    else if (netdiskName.includes('天翼云盘')) badgeClass = 'bg-success';
-    else if (netdiskName.includes('123云盘')) badgeClass = 'bg-purple';
+    if (netdiskName.includes('百度网盘')) badgeClass = 'bg-mid-blue';
+    else if (netdiskName.includes('夸克网盘')) badgeClass = 'bg-terracotta';
+    else if (netdiskName.includes('悟空网盘')) badgeClass = 'bg-navy-blue';
+    else if (netdiskName.includes('快兔网盘')) badgeClass = 'bg-coral';
     else if (netdiskName.includes('115网盘')) badgeClass = 'bg-orange';
     else if (netdiskName.includes('迅雷网盘')) badgeClass = 'bg-teal';
-    else if (netdiskName.includes('UC网盘')) badgeClass = 'bg-mid-blue';
+    else if (netdiskName.includes('UC网盘')) badgeClass = 'bg-warm-gold';
     else if (netdiskName.includes('移动云盘')) badgeClass = 'bg-light-green';
-    else if (netdiskName.includes('PikPak')) badgeClass = 'bg-salmon';
+    else if (netdiskName.includes('天翼云盘')) badgeClass = 'bg-deep-violet';
+    else if (netdiskName.includes('123云盘')) badgeClass = 'bg-purple';
+    else if (netdiskName.includes('阿里云盘')) badgeClass = 'bg-dark-mint';
+    else if (netdiskName.includes('联通云盘')) badgeClass = 'bg-olive';
+        else if (netdiskName.includes('PikPak')) badgeClass = 'bg-salmon';
     // 链接类型
     else if (netdiskName.includes('磁力链接') || netdiskName.includes('迅雷链接') || netdiskName.includes('电驴链接')) badgeClass = 'bg-dark';
 

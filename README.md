@@ -9,9 +9,9 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/) [![MySQL](https://img.shields.io/badge/database-MySQL-orange.svg)](https://www.mysql.com/) [![Support](https://img.shields.io/badge/support-Quark%20%7C%20Baidu-brightgreen.svg)](#💾-网盘支持矩阵)
 
 <p align="center">
-  <a href="#🌐-在线演示-demo">在线演示</a> •
-  <a href="#💎-核心变现逻辑">变现逻辑</a> •
-  <a href="#🚀-快速开始">部署指南</a> •
+  <a href="#-在线演示-demo">在线演示</a> •
+  <a href="#-核心变现逻辑">变现逻辑</a> •
+  <a href="#-快速开始">部署指南</a> •
   <a href="https://github.com/ucmao/search-ucmao/issues">提交Bug</a>
 </p>
 
@@ -27,8 +27,8 @@
 
 * **🔍 用户搜索端**：[https://search.ucmao.cn](https://search.ucmao.cn) （无需登录，直接体验极简搜索与资源分发）
 * **⚙️ 管理后台**: [https://search.ucmao.cn/admin](https://search.ucmao.cn/admin)
-* **管理账号**: `admin`
-* **管理密码**: `admin123`
+  * **管理账号**: `admin`
+  * **管理密码**: `admin123`
 
 > **安全提示**：演示环境仅供功能体验。为了您的账号安全，请勿在演示站后台填入您真实的网盘 Cookie。
 
