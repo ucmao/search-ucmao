@@ -9,6 +9,7 @@ from src.services.hot_resource_service import (
     update_resource_info,
     delete_resource_and_share,
 )
+from src.db.cookie_config_dao import get_cookie_by_cloud_name, save_cookie
 
 logger = logging.getLogger(__name__)
 
@@ -80,3 +81,35 @@ def delete_resource(resource_id):
         status = 404 if message == "资源不存在" else 500
         return jsonify({"success": False, "message": message}), status
     return jsonify({"success": True, "message": message})
+
+
+@resources_bp.route("/cookie-config", methods=["GET"])
+@token_required
+def get_cookie_config():
+    """获取Cookie配置"""
+    baidu_cookie = get_cookie_by_cloud_name("百度网盘")
+    quark_cookie = get_cookie_by_cloud_name("夸克网盘")
+    return jsonify({"baidu_cookie": baidu_cookie, "quark_cookie": quark_cookie})
+
+
+@resources_bp.route("/cookie-config", methods=["POST"])
+@token_required
+def save_cookie_config():
+    """保存Cookie配置"""
+    data = request.get_json()
+    baidu_cookie = data.get("baidu_cookie", "")
+    quark_cookie = data.get("quark_cookie", "")
+    
+    # 保存百度网盘Cookie（如果提供）
+    if baidu_cookie:
+        success, message = save_cookie("百度网盘", baidu_cookie)
+        if not success:
+            return jsonify({"success": False, "message": message}), 500
+    
+    # 保存夸克网盘Cookie（如果提供）
+    if quark_cookie:
+        success, message = save_cookie("夸克网盘", quark_cookie)
+        if not success:
+            return jsonify({"success": False, "message": message}), 500
+    
+    return jsonify({"success": True, "message": "Cookie配置保存成功"})

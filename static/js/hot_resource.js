@@ -27,6 +27,12 @@ const batchSaveResourceBtn = document.getElementById('batchSaveResourceBtn');
 const exportCurrentPageBtn = document.getElementById('exportCurrentPageBtn');
 const exportAllPagesBtn = document.getElementById('exportAllPagesBtn');
 
+// Cookie 配置相关元素
+const cookieConfigModal = document.getElementById('cookieConfigModal');
+const saveCookieConfigBtn = document.getElementById('saveCookieConfigBtn');
+const baiduCookieInput = document.getElementById('baiduCookie');
+const quarkCookieInput = document.getElementById('quarkCookie');
+
 // ==========================================
 // 3. 核心工具函数
 // ==========================================
@@ -620,6 +626,47 @@ async function exportAllPages() {
     }
 }
 
+// 加载现有的 Cookie 配置
+async function loadCookieConfig() {
+    try {
+        const response = await fetch('/cookie-config');
+        const data = await response.json();
+        if (baiduCookieInput) baiduCookieInput.value = data.baidu_cookie || '';
+        if (quarkCookieInput) quarkCookieInput.value = data.quark_cookie || '';
+    } catch (error) {
+        console.error('加载Cookie失败:', error);
+    }
+}
+
+// 保存 Cookie 配置
+async function saveCookieConfig() {
+    const payload = {
+        baidu_cookie: baiduCookieInput.value.trim(),
+        quark_cookie: quarkCookieInput.value.trim()
+    };
+
+    try {
+        const response = await fetch('/cookie-config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Cookie配置保存成功', 'success');
+            // 关闭模态框 (使用 Bootstrap 原生方法)
+            const modalInstance = bootstrap.Modal.getInstance(cookieConfigModal);
+            if (modalInstance) modalInstance.hide();
+        } else {
+            showToast('保存失败: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showToast('请求失败，请检查网络', 'error');
+    }
+}
+
+
 // ==========================================
 // 8. 初始化入口 (统一)
 // ==========================================
@@ -653,6 +700,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadResources();
             }, 300); // 防抖
         });
+    }
+
+    // 绑定 Cookie 模态框显示时加载数据
+    if (cookieConfigModal) {
+        cookieConfigModal.addEventListener('show.bs.modal', loadCookieConfig);
+    }
+
+    // 绑定保存按钮
+    if (saveCookieConfigBtn) {
+        saveCookieConfigBtn.addEventListener('click', saveCookieConfig);
     }
 
     // 绑定按钮事件

@@ -121,10 +121,6 @@ DB_USER = root
 DB_PASSWORD = your_password_here
 DB_CHARSET = utf8mb4
 
-# 变现核心：网盘Cookie
-QUARK_PAN_COOKIE = your_quark_pan_cookie_here
-BAIDU_PAN_COOKIE = your_baidu_pan_cookie_here
-
 # 管理员账号配置
 ADMIN_USERNAME = admin
 ADMIN_PASSWORD = your_admin_password_here
@@ -157,7 +153,8 @@ python app.py
 1. **登录网页版**：在浏览器打开 **百度网盘** 或 **夸克网盘** 官网并登录。
 2. **进入开发者模式**：按下 `F12`，切换到 **Network (网络)** 标签页。
 3. **刷新页面**：按 `F5` 刷新，在左侧列表中找到第一个请求。
-4. **复制 Cookie**：在右侧 **Headers (标头)** 中找到 `Cookie:` 字段，复制整段字符串并粘贴到 `.env`。
+4. **复制 Cookie**：在右侧 **Headers (标头)** 中找到 `Cookie:` 字段，复制整段字符串。
+5. **完成配置**：登录推广后台，进入**热门资源**管理界面，点击**配置Cookie**，粘贴保存以激活功能。
 
 ---
 

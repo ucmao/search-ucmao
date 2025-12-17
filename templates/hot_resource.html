@@ -75,7 +75,7 @@
                     </label>
                 </div>
             </div>
-            <div class="col-md-4">
+            <!-- <div class="col-md-4">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="{{ prefix }}Kaitu" value="kaitu" disabled>
                     <label class="form-check-label" for="{{ prefix }}Kaitu">
@@ -83,22 +83,22 @@
                     </label>
                 </div>
             </div>
-<!--            <div class="col-md-4">-->
-<!--                <div class="form-check">-->
-<!--                    <input class="form-check-input" type="checkbox" id="{{ prefix }}115" value="115" disabled>-->
-<!--                    <label class="form-check-label" for="{{ prefix }}115">-->
-<!--                        115网盘-->
-<!--                    </label>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="col-md-4">-->
-<!--                <div class="form-check">-->
-<!--                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Tianyi" value="tianyi" disabled>-->
-<!--                    <label class="form-check-label" for="{{ prefix }}Tianyi">-->
-<!--                        天翼云盘-->
-<!--                    </label>-->
-<!--                </div>-->
-<!--            </div>-->
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}115" value="115" disabled>
+                    <label class="form-check-label" for="{{ prefix }}115">
+                        115网盘
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Tianyi" value="tianyi" disabled>
+                    <label class="form-check-label" for="{{ prefix }}Tianyi">
+                        天翼云盘
+                    </label>
+                </div>
+            </div>
             <div class="col-md-4">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="{{ prefix }}Yidong" value="yidong" disabled>
@@ -115,14 +115,14 @@
                     </label>
                 </div>
             </div>
-<!--            <div class="col-md-4">-->
-<!--                <div class="form-check">-->
-<!--                    <input class="form-check-input" type="checkbox" id="{{ prefix }}123" value="123" disabled>-->
-<!--                    <label class="form-check-label" for="{{ prefix }}123">-->
-<!--                        123云盘-->
-<!--                    </label>-->
-<!--                </div>-->
-<!--            </div>-->
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}123" value="123" disabled>
+                    <label class="form-check-label" for="{{ prefix }}123">
+                        123云盘
+                   </label>
+               </div>
+            </div> -->
         </div>
     {% endmacro %}
     <div class="container-fluid-custom pt-4">
@@ -143,6 +143,11 @@
             <div class="col-auto">
                 <button class="btn btn-success btn-sm" id="exportAllPagesBtn">
                     <i class="fas fa-file-download"></i> 导出全部
+                </button>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary btn-sm" id="configCookieBtn" data-bs-toggle="modal" data-bs-target="#cookieConfigModal">
+                    <i class="fas fa-cog"></i> 配置Cookie
                 </button>
             </div>
         </div>
@@ -226,7 +231,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="resourceRemarks" class="form-label">备注（可选，默认不设置）</label>
-                                <textarea class="form-control" id="resourceRemarks" rows="2"></textarea>
+                                <textarea class="form-control" id="resourceRemarks" rows="1"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">请勾选网盘，转存并替换成自己的分享链接（可选）</label>
@@ -301,7 +306,7 @@
     
     <!-- 批量添加资源模态框 -->
     <div class="modal fade" id="batchAddResourceModal" tabindex="-1" aria-labelledby="batchAddResourceModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="batchAddResourceModalLabel">批量添加资源（云盘自动检测）</h5>
@@ -331,7 +336,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="batchResourceRemarks" class="form-label">备注（可选，默认不设置）</label>
-                                <textarea class="form-control" id="batchResourceRemarks" rows="2"></textarea>
+                                <textarea class="form-control" id="batchResourceRemarks" rows="1"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">请勾选网盘，转存并替换成自己的分享链接（可选）</label>
@@ -407,6 +412,39 @@ GET /api?type=音乐&sort=desc</code></pre>
             </div>
         </div>
     </div>
+
+    <!-- Cookie配置模态框 -->
+    <div class="modal fade" id="cookieConfigModal" tabindex="-1" aria-labelledby="cookieConfigModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cookieConfigModalLabel">云盘Cookie配置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h6>百度网盘</h6>
+                        <div class="form-group">
+                            <label for="baiduCookie">百度网盘Cookie</label>
+                            <textarea class="form-control" id="baiduCookie" rows="5" placeholder="请输入百度网盘的Cookie"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h6>夸克网盘</h6>
+                        <div class="form-group">
+                            <label for="quarkCookie">夸克网盘Cookie</label>
+                            <textarea class="form-control" id="quarkCookie" rows="5" placeholder="请输入夸克网盘的Cookie"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="saveCookieConfigBtn">保存配置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block scripts %}

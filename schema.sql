@@ -30,12 +30,12 @@ CREATE TABLE `api_config` (
 DROP TABLE IF EXISTS `resources`;
 CREATE TABLE `resources` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `file_id` varchar(255) NOT NULL,
+  `file_id` varchar(255) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `share_link` text NOT NULL,
   `cloud_name` varchar(100) NOT NULL,
-  `type` varchar(50) NOT NULL,
-  `remarks` text,
+  `type` varchar(50) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
   `is_replaced` BOOLEAN DEFAULT FALSE,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -64,6 +64,20 @@ INSERT INTO `api_config` (`name`, `url`, `method`, `request`, `response`, `statu
 ('狗狗盘搜', 'https://gogopanso.com:3642/search?keyword=[[keyword]]', 'get', '', 'data[*].[name, downurl]', 1, 2962, 1),
 ('趣盘搜', 'https://v.funletu.com/search', 'post', '{"style": "get", "datasrc": "search", "query": {"id": "", "datetime": "", "courseid": 1, "categoryid": "", "filetypeid": "", "filetype": "", "reportid": "", "validid": "", "searchtext": "[[keyword]]", "fileid": ""}, "page": {"pageSize": 10, "pageIndex": 1}, "order": {"prop": "sort", "order": "desc"}, "message": "请求资源列表数据"}', 'data[*].[title, url]', 1, 182, 1),
 ('pansou', 'https://so.252035.xyz/api/search?kw=[[keyword]]', 'get', '', 'data.merged_by_type.* | [].[note, url]', 1, 5200, 1);
+
+-- ----------------------------
+-- Table structure for `cookie_config`
+-- ----------------------------
+DROP TABLE IF EXISTS `cookie_config`;
+CREATE TABLE `cookie_config` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `cloud_name` varchar(100) NOT NULL COMMENT '云盘名称',
+  `cookie` text NOT NULL COMMENT 'Cookie内容',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_cloud_name` (`cloud_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='云盘Cookie配置表';
 
 -- ----------------------------
 -- Test data for `resources`

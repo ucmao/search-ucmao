@@ -1,208 +1,156 @@
 import logging
 import time
-
-# 导入配置：新增 BAIDU_PAN_COOKIE
-from configs.app_config import QUARK_PAN_COOKIE, BAIDU_PAN_COOKIE
-
-logger = logging.getLogger(__name__)
-
-# 导入 Quark 和新增 Baidu 类
 from src.clients.quark_client import Quark
 from src.clients.baidu_client import Baidu
 from src.db.resources_dao import insert_resource, delete_by_share_link, update_share_link
+from src.db.cookie_config_dao import get_cookie_by_cloud_name
 from utils.netdisk_utils import match_netdisk_link
 
+logger = logging.getLogger(__name__)
 
-def _handle_netdisk_operation(client_class, client_cookie, share_url, to_pdir_path: str = '/', operation: str = 'store',
-                              file_id: str = None):
+# --- 工具函数：Cookie 校验 ---
+
+def get_and_validate_cookie(netdisk_type: str) -> str:
     """
-    通用网盘操作处理器（转存/分享 或 删除）。
-
-    :param client_class: 要实例化的网盘客户端类 (Quark 或 Baidu)。
-    :param client_cookie: 客户端的 Cookie。
-    :param share_url: 原始分享链接。
-    :param to_pdir_path: 目标转存路径（仅对 store 有效）。
-    :param operation: 执行的操作 ('store' 或 'delete')。
-    :param file_id: 要删除的文件的 ID（仅对 delete 有效）。
-    :return:
-        - store: (new_file_id, file_name, new_share_url) 或 (None, None, None)
-        - delete: True/False
+    统一获取并校验 Cookie。
+    :param netdisk_type: "夸克网盘" 或 "百度网盘"
+    :return: 有效的 cookie 字符串，无效则返回空字符串
     """
-    if not client_cookie:
-        logger.error(f"网盘客户端 {client_class.__name__} 的 Cookie 未配置，操作终止。")
-        if operation == 'store':
-            return None, None, None
-        return False
+    cookie = get_cookie_by_cloud_name(netdisk_type)
+    
+    if not cookie:
+        logger.error(f"[{netdisk_type}] 操作失败：数据库中未配置 Cookie。")
+        return ""
+    
+    if len(cookie) < 300:
+        logger.error(f"[{netdisk_type}] 操作失败：Cookie 长度不足({len(cookie)})，可能已失效。")
+        return ""
+        
+    return cookie
 
+# --- 核心逻辑：通用网盘操作处理器 ---
+
+def _handle_netdisk_operation(client_class, client_cookie, share_url, to_pdir_path: str = '/', 
+                              operation: str = 'store', file_id: str = None):
+    """
+    通用网盘操作处理器（转存或删除）。
+    """
     client = client_class(client_cookie)
-
     try:
         if operation == 'store':
-            # 调用 store 方法：完成解析、转存和创建分享链接的完整流程
-            # 注意：百度客户端的 store 方法默认路径为 '/'
-            if client_class == Baidu:
-                new_file_id, file_name, new_share_url = client.store(share_url, to_pdir_path)
-            else:  # Quark
-                new_file_id, file_name, new_share_url = client.store(share_url, to_pdir_path)
+            # 执行转存流程
+            new_file_id, file_name, new_share_url = client.store(share_url, to_pdir_path)
 
             if not new_file_id or not new_share_url:
-                logger.error(f"处理 {client_class.__name__} 链接失败: {share_url}")
+                logger.error(f"[{client_class.__name__}] 转存或分享接口返回空数据")
                 return None, None, None
 
-            logger.info(
-                f"成功处理 {client_class.__name__} 链接，文件ID: {new_file_id}, 文件名: {file_name}, 新分享链接: {new_share_url}")
-
-            # 增加延迟，避免 API 限流
-            time.sleep(0.5)
+            logger.info(f"[{client_class.__name__}] 处理成功: {file_name}")
+            time.sleep(0.5)  # 避免频率过快
             return new_file_id, file_name, new_share_url
 
         elif operation == 'delete':
-            # 调用 del_file 方法
             if not file_id:
-                logger.error("删除操作缺少 file_id。")
+                logger.error(f"[{client_class.__name__}] 删除操作缺失 file_id")
                 return False
 
-            # 百度客户端的 del_file 接受路径列表，夸克客户端接受单个 ID
-            if client_class == Baidu:
-                # 假设 file_id 存储的是百度网盘的完整路径，从数据库获取
-                file_path = file_id  # 在百度网盘中，file_id通常是fs_id，但删除接口需要路径
-                status = client.del_file([file_path])
-            else:  # Quark
-                status = client.del_file(file_id)
-
-            if status:
-                logger.info(f"成功执行 {client_class.__name__} 文件删除操作，ID/路径: {file_id}")
-            else:
-                logger.error(f"{client_class.__name__} 删除文件操作失败，ID/路径: {file_id}")
+            # 百度删除通常需要路径列表，夸克通常是 ID
+            target = [file_id] if client_class == Baidu else file_id
+            status = client.del_file(target)
             return status
 
     except Exception as e:
-        logger.error(f"处理 {client_class.__name__} 链接时发生异常: {e}")
-        if operation == 'store':
-            return None, None, None
-        return False
+        logger.exception(f"[{client_class.__name__}] 接口调用异常: {e}")
+        return (None, None, None) if operation == 'store' else False
 
+# --- 业务接口：创建分享 ---
 
 def create_share(share_data):
     """
-    创建分享链接 (支持夸克和百度网盘)
-    :param share_data: 分享数据，包含 share_url, title, save_to_netdisk 等
-    :return: 如果是从搜索路由调用（无id），返回处理结果；否则返回None
+    创建/转存分享链接
     """
     try:
-        logger.info(f"开始处理分享，分享数据: {share_data}")
-
-        share_url = share_data['share_url']
-        title = share_data.get('title', f"未命名资源_{time.time()}")
+        share_url = share_data.get('share_url')
+        title = share_data.get('title', f"资源_{int(time.time())}")
         save_to_netdisk = share_data.get('save_to_netdisk', {})
-
         has_id = 'id' in share_data
         share_id = share_data.get('id')
 
-        # 1. 确定网盘类型和是否需要转存
+        # 1. 匹配网盘类型
         netdisk_type = match_netdisk_link(share_url)
-        to_quark = (netdisk_type == "夸克网盘" and save_to_netdisk.get('quark', False))
-        to_baidu = (netdisk_type == "百度网盘" and save_to_netdisk.get('baidu', False))
+        config_map = {
+            "夸克网盘": {"class": Quark, "enabled": save_to_netdisk.get('quark', False)},
+            "百度网盘": {"class": Baidu, "enabled": save_to_netdisk.get('baidu', False)}
+        }
+        
+        conf = config_map.get(netdisk_type)
 
-        if to_quark:
-            logger.info(f"检测到夸克网盘链接且用户选择转存，开始处理: {share_url}")
-            client_class = Quark
-            client_cookie = QUARK_PAN_COOKIE
-        elif to_baidu:
-            logger.info(f"检测到百度网盘链接且用户选择转存，开始处理: {share_url}")
-            client_class = Baidu
-            client_cookie = BAIDU_PAN_COOKIE
-        else:
-            logger.info(f"无需执行网盘替换操作: {share_url}")
-            # 如果是从搜索路由调用且无需转存，返回原始数据
-            if not has_id:
-                return share_data
-            return
+        # 2. 判断是否需要转存
+        if not conf or not conf["enabled"]:
+            logger.info(f"无需转存操作，跳过。类型: {netdisk_type}")
+            return share_data if not has_id else None
 
-        # 2. 执行转存、分享操作
+        # 3. 获取并校验 Cookie
+        client_cookie = get_and_validate_cookie(netdisk_type)
+        if not client_cookie:
+            return share_data if not has_id else None
+
+        # 4. 执行转存
         new_file_id, file_name, new_share_url = _handle_netdisk_operation(
-            client_class=client_class,
+            client_class=conf["class"],
             client_cookie=client_cookie,
             share_url=share_url,
             operation='store'
         )
 
-        if not new_file_id or not new_share_url:
-            logger.error(f"处理 {netdisk_type} 网盘链接失败: {share_url}")
-            if not has_id:
-                return None
-            return
+        if not new_share_url:
+            return share_data if not has_id else None
 
-        # 3. 数据库和返回处理
+        # 5. 数据库同步
         if has_id:
-            # 更新数据库中的分享链接
-            update_result = update_share_link(share_id, new_share_url, new_file_id)
-
-            if not update_result:
-                logger.error(f"更新分享链接失败: {share_id}")
-                return
-
-            logger.info(f"成功更新分享链接: {share_id}")
-            return
+            # 场景 A: 已有记录更新链接
+            update_share_link(share_id, new_share_url, new_file_id)
+            return None
         else:
-            # 从搜索路由调用，需要返回处理结果
-            # 检查是否需要插入新记录
-            if any(key in share_data for key in ['name', 'cloud_name', 'resource_type', 'remark']):
-                original_record = {
+            # 场景 B: 搜索发现新资源，入库并返回新对象
+            if any(key in share_data for key in ['name', 'cloud_name']):
+                new_record = {
                     'file_id': new_file_id,
-                    'name': share_data.get('name', title),
+                    'name': share_data.get('name', file_name or title),
                     'share_link': new_share_url,
-                    'cloud_name': share_data.get('cloud_name', netdisk_type),  # 使用实际转存的网盘名称
-                    'type': share_data.get('resource_type', None),
-                    'remarks': share_data.get('remark', None)
+                    'cloud_name': netdisk_type,
+                    'type': share_data.get('resource_type'),
+                    'remarks': share_data.get('remark')
                 }
-                new_id = insert_resource(original_record)
-                if new_id:
-                    logger.info(f"资源 {title} 已成功添加到数据库，ID: {new_id}")
-                    return original_record
-                else:
-                    logger.error(f"资源 {title} 添加到数据库失败")
-                    return None
-            else:
-                return {"share_url": new_share_url, "file_id": new_file_id}
+                insert_resource(new_record)
+                return new_record
+            return {"share_url": new_share_url, "file_id": new_file_id}
 
     except Exception as e:
-        logger.error(f"处理分享时发生错误: {e}")
-        if 'id' not in share_data:
-            return None
-        return
+        logger.exception(f"create_share 运行异常: {e}")
+        return share_data if 'id' not in share_data else None
 
+# --- 业务接口：删除分享 ---
 
 def del_share(share_data):
     """
-    删除分享链接对应的网盘文件 (支持夸克和百度网盘)
+    删除分享及其对应的网盘文件
     """
     try:
-        # 检查 share_data 是否包含必需的 share_link
         share_url = share_data.get('share_url')
-        if not share_url:
-            logger.error("分享链接 'share_url' 是必需的，但未提供。")
-            return None
-
-        # 1. 确定网盘类型、文件ID和客户端
-        netdisk_type = match_netdisk_link(share_url)
         file_id = share_data.get('file_id')
 
-        if netdisk_type == "夸克网盘":
-            client_class = Quark
-            client_cookie = QUARK_PAN_COOKIE
-        elif netdisk_type == "百度网盘":
-            client_class = Baidu
-            client_cookie = BAIDU_PAN_COOKIE
-        else:
-            logger.warning(f"分享链接 {share_url} 不是支持的网盘链接，跳过处理。")
-            return None
+        if not share_url:
+            return False
 
-        if not file_id:
-            logger.error(f"未找到分享链接 {share_url} 对应的 file_id，无法删除。")
-            return None
+        # 1. 获取 Cookie
+        netdisk_type = match_netdisk_link(share_url)
+        client_cookie = get_and_validate_cookie(netdisk_type)
+        if not client_cookie:
+            return False
 
-        # 2. 执行删除文件操作
+        # 2. 执行物理删除
+        client_class = Baidu if netdisk_type == "百度网盘" else Quark
         status = _handle_netdisk_operation(
             client_class=client_class,
             client_cookie=client_cookie,
@@ -211,16 +159,14 @@ def del_share(share_data):
             file_id=file_id
         )
 
-        # 3. 数据库处理
+        # 3. 逻辑删除（数据库记录清理）
         if status:
-            # 从数据库中删除记录
             delete_by_share_link(share_url)
-            logger.info(f"成功删除分享及数据库记录，链接: {share_url}")
+            logger.info(f"成功清理 {netdisk_type} 资源及其数据库记录")
             return True
-        else:
-            logger.error(f"{netdisk_type} 网盘删除文件操作失败，链接: {share_url}")
-            return False
+        
+        return False
 
     except Exception as e:
-        logger.error(f"删除分享时出现错误，错误信息: {str(e)}")
-        return None
+        logger.exception(f"del_share 运行异常: {e}")
+        return False
