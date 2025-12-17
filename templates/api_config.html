@@ -1,0 +1,265 @@
+{% extends "_layout.html" %}
+{% set active_page = 'config' %}
+
+
+{% block head %}
+    <title>小青搜剧 - 搜索API配置管理</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/api_config.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid-custom pt-4">
+        <h2 class="text-center mb-4">搜索API配置管理</h2>
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                <button class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#addApiModal">
+                    <i class="fas fa-plus"></i> 新建API
+                </button>
+
+                <button class="btn btn-success btn-sm me-2" id="enableAllButton" onclick="enableAllApis()">
+                    <i class="fas fa-power-off"></i> 全部启用
+                </button>
+                <button class="btn btn-secondary btn-sm" id="disableAllButton" onclick="disableAllApis()">
+                    <i class="fas fa-ban"></i> 全部禁用
+                </button>
+            </div>
+            <button class="btn btn-info btn-sm text-white" id="testAllButton" onclick="testAllApis()">
+                <i class="fas fa-play"></i> 测试所有API
+            </button>
+        </div>
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>序号</th>
+                    <th>状态</th>
+                    <th>名字</th>
+                    <th>接口</th>
+                    <th>方法</th>
+                    <th>耗时(ms)</th>
+                    <th>请求体</th>
+                    <th>提取规则</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="apiTableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <!-- 新建API模态框 - 蓝色主题 -->
+    <div class="modal fade" id="addApiModal" tabindex="-1" aria-labelledby="addApiModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addApiModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i> 新建 API 配置
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addApiForm">
+                        <fieldset>
+                            <legend>基础信息</legend>
+                            <div class="row mb-2">
+                                <div class="col-md-6 form-group">
+                                    <label for="apiName">
+                                        名字 <span class="text-danger">*</span>
+                                        <i class="fas fa-question-circle help-tooltip" data-tooltip="用于识别 API，如「网盘搜索-接口1」"></i>
+                                    </label>
+                                    <input type="text" class="form-control" id="apiName" placeholder="" required>
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label for="apiMethod">
+                                        请求方法 <span class="text-danger">*</span>
+                                        <i class="fas fa-question-circle help-tooltip" data-tooltip="默认：POST"></i>
+                                    </label>
+                                    <select class="form-control" id="apiMethod" required>
+                                        <option value="get">GET</option>
+                                        <option value="post" selected>POST</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label for="apiIsEnabled">
+                                        启用状态 <span class="text-danger">*</span>
+                                        <i class="fas fa-question-circle help-tooltip" data-tooltip="默认：启用"></i>
+                                    </label>
+                                    <select class="form-control" id="apiIsEnabled" required>
+                                        <option value="true">启用</option>
+                                        <option value="false">禁用</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-md-12 form-group">
+                                    <label for="apiUrl">
+                                        接口 URL <span class="text-danger">*</span>
+                                        <i class="fas fa-question-circle help-tooltip" data-tooltip="需嵌入 [[keyword]] 作为关键词占位符"></i>
+                                    </label>
+                                    <input type="text" class="form-control" id="apiUrl" placeholder="例：https://api.example.com/search?q=[[keyword]]" required>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>请求配置</legend>
+                            <div class="form-group mb-2 code-input">
+                                <label for="apiRequest">
+                                    请求体 (JSON)
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="formatJson('apiRequest')">
+                                        <i class="fas fa-magic"></i> 格式化
+                                    </button>
+                                    <i class="fas fa-question-circle help-tooltip" data-tooltip="需嵌入 [[keyword]] 作为关键词占位符，GET 请求通常为空"></i>
+                                </label>
+                                <textarea class="form-control" id="apiRequest" rows="3" placeholder='例：{"query": "[[keyword]]"}'></textarea>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>响应配置</legend>
+                            <div class="form-group mb-2 code-input">
+                                <label for="apiResponse">
+                                    JMESPath 提取规则 <span class="text-danger">*</span>
+                                    <i class="fas fa-question-circle help-tooltip" data-tooltip="提取标题和链接的规则，例如：data[*].[name, url]"></i>
+                                    <a href="https://jmespath.org/tutorial.html" target="_blank" class="ms-2" title="JMESPath 教程">
+                                        示例参考
+                                    </a>
+                                </label>
+                                <textarea class="form-control" id="apiResponse" rows="2" placeholder="例：data[*].[name, url]" required></textarea>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-warning btn-sm me-2" id="apiTestButton" onclick="testDraftApi('api')">
+                            <i class="fas fa-play me-1"></i> 测试
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm me-2" onclick="document.getElementById('addApiForm').reset()">
+                            <i class="fas fa-undo me-1"></i> 重置
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> 关闭
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="addApi()">
+                            <i class="fas fa-save me-1"></i> 保存
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改API模态框 - 橙色主题 -->
+    <div class="modal fade" id="editApiModal" tabindex="-1" aria-labelledby="editApiModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editApiModalLabel">
+                        <i class="fas fa-edit me-2"></i> 修改 API 配置
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editApiForm">
+                        <input type="hidden" id="editApiId">
+                        <fieldset>
+                            <legend>基础信息</legend>
+                            <div class="row mb-2">
+                                <div class="col-md-6 form-group">
+                                    <label for="editApiName">
+                                        名字 <span class="text-danger">*</span>
+                                        <i class="fas fa-question-circle help-tooltip" data-tooltip="用于识别 API，如「网盘搜索-接口1」"></i>
+                                    </label>
+                                    <input type="text" class="form-control" id="editApiName" required>
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label for="editApiMethod">
+                                        请求方法 <span class="text-danger">*</span>
+                                        <i class="fas fa-question-circle help-tooltip" data-tooltip="选择 GET 或 POST 请求方法"></i>
+                                    </label>
+                                    <select class="form-control" id="editApiMethod" required>
+                                        <option value="get">GET</option>
+                                        <option value="post">POST</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label for="editApiIsEnabled">
+                                        启用状态 <span class="text-danger">*</span>
+                                        <i class="fas fa-question-circle help-tooltip" data-tooltip="启用或禁用此 API 配置"></i>
+                                    </label>
+                                    <select class="form-control" id="editApiIsEnabled" required>
+                                        <option value="true">启用</option>
+                                        <option value="false">禁用</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-12 form-group">
+                                    <label for="editApiUrl">
+                                        接口 URL <span class="text-danger">*</span>
+                                        <i class="fas fa-question-circle help-tooltip" data-tooltip="完整的 API 接口地址，需包含 [[keyword]] 占位符"></i>
+                                    </label>
+                                    <input type="text" class="form-control" id="editApiUrl" placeholder="例：https://api.example.com/search?q=[[keyword]]" required>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>请求配置</legend>
+                            <div class="form-group mb-2 code-input">
+                                <label for="editApiRequest">
+                                    请求体 (JSON)
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="formatJson('editApiRequest')">
+                                        <i class="fas fa-magic"></i> 格式化
+                                    </button>
+                                    <i class="fas fa-question-circle help-tooltip" data-tooltip="JSON 格式的请求体，GET 请求通常为空"></i>
+                                </label>
+                                <textarea class="form-control" id="editApiRequest" rows="3"></textarea>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <legend>响应配置</legend>
+                            <div class="form-group mb-2 code-input">
+                                <label for="editApiResponse">
+                                    JMESPath 提取规则 <span class="text-danger">*</span>
+                                    <i class="fas fa-question-circle help-tooltip" data-tooltip="提取标题和链接的规则，例如：data[*].[name, url]"></i>
+                                    <a href="https://jmespath.org/tutorial.html" target="_blank" class="ms-2" title="JMESPath 教程">
+                                        示例参考
+                                    </a>
+                                </label>
+                                <textarea class="form-control" id="editApiResponse" rows="2" placeholder="例：data[*].[name, url]" required></textarea>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-warning btn-sm me-2" id="editApiTestButton" onclick="testDraftApi('editApi')">
+                            <i class="fas fa-play me-1"></i> 测试
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> 关闭
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="saveEditedApi()">
+                            <i class="fas fa-save me-1"></i> 保存修改
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-live="polite" aria-atomic="true" id="toastContainer"></div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/api_config.js') }}"></script>
+{% endblock %}

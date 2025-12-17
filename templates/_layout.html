@@ -1,0 +1,239 @@
+{% set active_page = active_page or 'search' %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% block head %}{% endblock %}
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* ------------------------------------- */
+        /* 1. 全局美化和底部固定布局 (公共样式) */
+        /* ------------------------------------- */
+        body {
+            font-size: 0.9rem;
+            background-color: #f7f9fc;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            /* 头部固定后，body需要内边距避让 */
+            padding-top: 86px;
+        }
+
+        /* 整体容器宽度放大到 1200px，负责居中和最大宽度 */
+        .container-fluid-custom {
+            max-width: 1200px;
+            padding: 0 15px;
+            margin: auto;
+            width: 100%;
+        }
+
+        /* 主内容区域，占据剩余空间，将底部推下去 */
+        .main-content-wrapper {
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        /* Footer 和 Header 包装器 */
+        .header-wrapper, .footer-container {
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        /* --- 头部导航/Logo (固定位置) --- */
+        .header-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-bar {
+            padding: 15px 0;
+        }
+
+        .header-divider {
+            border-top: 1px solid #e0e0e0;
+            margin-bottom: 0;
+        }
+
+        .search-logo-container {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .search-logo {
+            max-width: 35px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .top-right-nav .btn {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: 15px;
+            border-radius: 8px;
+        }
+
+
+        /* --- 底部版权 --- */
+        .footer-container {
+            flex-shrink: 0;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .footer-copyright {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .logo-text {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-wrapper">
+    <div class="container-fluid-custom header-bar">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('search_index') }}" class="search-logo-container">
+                <img src="{{ url_for('static', filename='images/search_logo.png') }}" alt="小青搜剧" class="search-logo">
+                <span class="logo-text">小青搜剧</span>
+            </a>
+            <div class="top-right-nav">
+                <button class="btn {{ 'btn-primary' if active_page == 'search' else 'btn-outline-secondary' }}" id="searchLink">
+                    <i class="fas fa-search"></i> 搜索
+                </button>
+                <button class="btn {{ 'btn-primary' if active_page == 'config' else 'btn-outline-secondary' }}" id="configLink" {% if not is_logged_in %}style="display: none;"{% endif %}>
+                    <i class="fas fa-cog"></i> 配置
+                </button>
+                <button class="btn {{ 'btn-primary' if active_page == 'resources' else 'btn-outline-secondary' }}" id="resourcesLink" {% if not is_logged_in %}style="display: none;"{% endif %}>
+                    <i class="fas fa-fire"></i> 热门资源
+                </button>
+                <button class="btn btn-link text-muted" id="adminLoginLink" {% if is_logged_in %}style="display: none;"{% endif %}>
+                    <i class="fas fa-user"></i> 登录
+                </button>
+                <button class="btn btn-link text-muted" id="adminLogoutLink" {% if not is_logged_in %}style="display: none;"{% endif %}>
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="header-divider"></div>
+</div>
+
+{% block content %}{% endblock %}
+
+<div class="footer-container">
+    <div class="container-fluid-custom">
+        <div class="footer-copyright">
+            &copy; 2024-2025 小青搜剧 | <a id="disclaimerLink">仅供学习交流使用</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+    crossorigin="anonymous"></script>
+
+{% block scripts %}
+<script>
+    // --- 导航链接事件的公共逻辑 ---
+
+
+
+    // 检查是否有JWT令牌来确定用户是否登录
+        document.addEventListener('DOMContentLoaded', () => {
+            const configLink = document.getElementById('configLink');
+            const resourcesLink = document.getElementById('resourcesLink');
+            const adminLoginLink = document.getElementById('adminLoginLink');
+            const adminLogoutLink = document.getElementById('adminLogoutLink');
+            const searchLink = document.getElementById('searchLink');
+
+            // 搜索按钮始终可见，无需设置
+
+            // 配置按钮点击事件 - 移除密码验证
+            if (configLink) {
+                configLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = '/api_config';
+                });
+            }
+
+            // 热门资源按钮点击事件 - 移除密码验证
+            if (resourcesLink) {
+                resourcesLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = '/hot_resource';
+                });
+            }
+
+            // 管理员登录按钮点击事件
+            if (adminLoginLink) {
+                adminLoginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = '/admin';
+                });
+            }
+
+            // 管理员退出按钮点击事件
+            if (adminLogoutLink) {
+                adminLogoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = '/logout';
+                });
+            }
+
+            // 顶部搜索按钮点击事件 (点击跳转到首页)
+            if (searchLink) {
+                searchLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // *** 修正：跳转到 Flask 搜索页路由 'index' ***
+                    window.location.href = "{{ url_for('search_index') }}";
+                });
+            }
+
+        // 头部 Logo 的链接也改为明确跳转到首页路由
+        const logoLink = document.querySelector('.search-logo-container');
+        if (logoLink) {
+            logoLink.href = "{{ url_for('search_index') }}";
+        }
+
+        // 底部免责声明点击事件
+        const disclaimerLink = document.getElementById('disclaimerLink');
+        if (disclaimerLink) {
+            disclaimerLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                alert('\n小青搜剧整合多源影视资源 API，提供高效影视检索服务。\n\n声明：\n1. 本工具仅作为影视资源检索的辅助工具，不存储任何资源内容。\n2. 所有数据来源于第三方 API，仅供学习与交流使用，请勿用于商业用途。\n\n感谢您的使用！');
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+</body>
+</html>

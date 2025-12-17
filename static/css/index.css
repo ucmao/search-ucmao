@@ -1,0 +1,204 @@
+/* --- 搜索栏 --- */
+.search-area {
+    margin-bottom: 30px;
+}
+
+.input-group-custom {
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#searchInput {
+    height: 50px;
+    border: none;
+}
+
+/* 搜索按钮改为纸飞机图标样式 - 无背景无边框 */
+#searchButton {
+    width: 50px;
+    font-weight: 600;
+    background-color: transparent;
+    border: none;
+    color: #6c757d;
+    padding: 0;
+    height: 50px;
+    transition: all 0.2s;
+}
+
+/* ⬇️⬇️⬇️ 纸飞机动画样式 ⬇️⬇️⬇️ */
+@keyframes fly-animate {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+        transform: translate(3px, -3px) rotate(15deg);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+}
+
+#searchButton.is-flying i {
+    animation: fly-animate 0.8s ease-in-out infinite;
+}
+/* ⬆️⬆️⬆️ 纸飞机动画样式 ⬆️⬆️⬆️ */
+
+#searchButton.searching {
+    color: #007bff;
+}
+
+#searchButton:hover:not(.searching) {
+    color: #0056b3;
+}
+
+#searchButton i {
+    font-size: 1.1rem;
+}
+
+/* --- 自定义网盘颜色 (将所有自定义颜色放入子模板，避免污染布局) --- */
+.bg-purple { background-color: #8c5dff !important; color: white !important; }
+.bg-orange { background-color: #f09516 !important; color: white !important; }
+.bg-teal { background-color: #32a8a8 !important; color: white !important; }
+.bg-mid-blue { background-color: #4f74d9 !important; color: white !important; }
+.bg-light-green { background-color: #99cc33 !important; color: white !important; }
+.bg-salmon { background-color: #ff8c64 !important; color: white !important; }
+.bg-slate-blue { background-color: #4e749c !important; color: white !important; }
+
+/* --- 初始提示区域 --- */
+.initial-prompt-area {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    color: #6c757d;
+}
+.initial-icon-wrapper {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    margin-bottom: 15px;
+}
+.initial-icon-wrapper i {
+    font-size: 1.5rem;
+    color: #6c757d;
+}
+.initial-prompt-area h3 {
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+
+/* --- 网盘过滤栏 --- */
+#netdisk-filter-bar {
+    padding: 10px 0;
+    margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+.filter-btn {
+    background-color: #ffffff;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 6px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+.filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+/* --- 搜索结果容器 --- */
+#scrollableResults {
+    max-height: 80vh;
+    overflow-y: auto;
+    background-color: #fff;
+    padding: 0 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* 结果行样式 - 减少 Padding */
+.result-item {
+    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.result-info {
+    flex-grow: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.result-title, .result-url-line {
+    display: block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.result-url-line {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+/* --- Hot 资源定制样式 --- */
+.result-item.hot-result .result-title,
+.result-item.hot-result .result-url-line a {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.result-item.hot-result .result-title {
+    color: #000 !important;
+}
+
+.result-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+/* 网盘名称徽章 */
+.netdisk-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 15px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    font-weight: 600;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .result-item {
+        flex-wrap: wrap;
+    }
+    .result-info {
+        min-width: 70%;
+    }
+    .result-actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 5px;
+        margin-left: 0;
+    }
+}

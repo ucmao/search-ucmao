@@ -1,0 +1,415 @@
+{% extends "_layout.html" %}
+{% set active_page = 'resources' %}
+
+{% block head %}
+    {{ super() }}
+    <title>小青搜剧 - 热门资源管理</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hot_resource.css') }}">
+{% endblock %}
+
+{% block content %}
+    {% macro resource_type_select(id, default_value='') %}
+        <select class="form-control" id="{{ id }}">
+            <option value="">请选择类型</option>
+            <option value="电影" {% if default_value == '电影' %}selected{% endif %}>电影</option>
+            <option value="电视剧" {% if default_value == '电视剧' %}selected{% endif %}>电视剧</option>
+            <option value="音乐" {% if default_value == '音乐' %}selected{% endif %}>音乐</option>
+            <option value="软件" {% if default_value == '软件' %}selected{% endif %}>软件</option>
+            <option value="图片" {% if default_value == '图片' %}selected{% endif %}>图片</option>
+            <option value="游戏" {% if default_value == '游戏' %}selected{% endif %}>游戏</option>
+            <option value="素材" {% if default_value == '素材' %}selected{% endif %}>素材</option>
+            <option value="教程" {% if default_value == '教程' %}selected{% endif %}>教程</option>
+            <option value="文档" {% if default_value == '文档' %}selected{% endif %}>文档</option>
+            <option value="其他" {% if default_value == '其他' %}selected{% endif %}>其他</option>
+        </select>
+    {% endmacro %}
+    
+    {% macro cloud_disk_checkboxes(prefix) %}
+        <div class="row g-2">
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Quark" value="quark" checked>
+                    <label class="form-check-label" for="{{ prefix }}Quark">
+                        夸克网盘
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Baidu" value="baidu" checked>
+                    <label class="form-check-label" for="{{ prefix }}Baidu">
+                        百度网盘
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Ali" value="ali" disabled>
+                    <label class="form-check-label" for="{{ prefix }}Ali">
+                        阿里云盘
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Xunlei" value="xunlei" disabled>
+                    <label class="form-check-label" for="{{ prefix }}Xunlei">
+                        迅雷网盘
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Uc" value="uc" disabled>
+                    <label class="form-check-label" for="{{ prefix }}Uc">
+                        UC网盘
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Wukong" value="wukong" disabled>
+                    <label class="form-check-label" for="{{ prefix }}Wukong">
+                        悟空网盘
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Kaitu" value="kaitu" disabled>
+                    <label class="form-check-label" for="{{ prefix }}Kaitu">
+                        快兔网盘
+                    </label>
+                </div>
+            </div>
+<!--            <div class="col-md-4">-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="checkbox" id="{{ prefix }}115" value="115" disabled>-->
+<!--                    <label class="form-check-label" for="{{ prefix }}115">-->
+<!--                        115网盘-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-md-4">-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Tianyi" value="tianyi" disabled>-->
+<!--                    <label class="form-check-label" for="{{ prefix }}Tianyi">-->
+<!--                        天翼云盘-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--            </div>-->
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Yidong" value="yidong" disabled>
+                    <label class="form-check-label" for="{{ prefix }}Yidong">
+                        移动云盘
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ prefix }}Liantong" value="liantong" disabled>
+                    <label class="form-check-label" for="{{ prefix }}Liantong">
+                        联通云盘
+                    </label>
+                </div>
+            </div>
+<!--            <div class="col-md-4">-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="checkbox" id="{{ prefix }}123" value="123" disabled>-->
+<!--                    <label class="form-check-label" for="{{ prefix }}123">-->
+<!--                        123云盘-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--            </div>-->
+        </div>
+    {% endmacro %}
+    <div class="container-fluid-custom pt-4">
+        <h2 class="text-center mb-4">热门资源管理</h2>
+        
+        <!-- 功能按钮 -->
+        <div class="row mb-3 justify-content-center">
+            <div class="col-auto">
+                <button class="btn btn-info btn-sm" id="viewApiBtn" data-bs-toggle="modal" data-bs-target="#apiModal">
+                    <i class="fas fa-code"></i> 查看API
+                </button>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-warning btn-sm" id="exportCurrentPageBtn">
+                    <i class="fas fa-file-export"></i> 导出当前页
+                </button>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-success btn-sm" id="exportAllPagesBtn">
+                    <i class="fas fa-file-download"></i> 导出全部
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-container mb-4">
+            <!-- 搜索框和新增按钮 -->
+            <div class="d-flex justify-content-between mb-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="searchInput" placeholder="按标题搜索">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary btn-sm" id="addResourceBtn" data-bs-toggle="modal" data-bs-target="#addResourceModal">
+                            <i class="fas fa-plus"></i> 新增资源
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#batchAddResourceModal">
+                            <i class="fas fa-plus-circle"></i> 批量添加
+                        </button>
+                    </div>
+                </div>
+            
+            <!-- 数据表格 -->
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 5%;">ID</th>
+                        <th style="width: 30%;">标题</th>
+                        <th style="width: 28%;">分享链接</th>
+                        <th style="width: 10%;">云盘名称</th>
+                        <th style="width: 9%;">类型</th>
+                        <th style="width: 7%;">同步状态</th>
+                        <th style="width: 11%;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="resourcesTableBody">
+                    <!-- 数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+            
+            <!-- 分页控件 -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- 分页按钮将通过JavaScript动态生成 -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- 新增资源模态框 -->
+    <div class="modal fade" id="addResourceModal" tabindex="-1" aria-labelledby="addResourceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addResourceModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i> 新增资源
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addResourceForm">
+                        <fieldset>
+                            <legend>资源信息</legend>
+                            <div class="mb-3">
+                                <label for="resourceName" class="form-label">
+                                    标题 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="resourceName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="resourceShareLink" class="form-label">
+                                    分享链接 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="resourceShareLink" required>
+                            </div>
+                            <div class="mb-3 d-none">
+                                <label for="resourceCloudName" class="form-label">云盘名称</label>
+                                <input type="text" class="form-control" id="resourceCloudName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="resourceType" class="form-label">类型（可选，默认不设置）</label>
+                                {{ resource_type_select('resourceType') }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="resourceRemarks" class="form-label">备注（可选，默认不设置）</label>
+                                <textarea class="form-control" id="resourceRemarks" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">请勾选网盘，转存并替换成自己的分享链接（可选）</label>
+                                {{ cloud_disk_checkboxes('resourceSaveTo') }}
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm" id="saveResourceBtn">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑资源模态框 -->
+    <div class="modal fade" id="editResourceModal" tabindex="-1" aria-labelledby="editResourceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editResourceModalLabel">
+                        <i class="fas fa-edit me-2"></i> 编辑资源
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editResourceForm">
+                        <input type="hidden" id="editResourceId">
+                        <fieldset>
+                            <legend>资源信息</legend>
+                            <div class="mb-3">
+                                <label for="editResourceName" class="form-label">
+                                    标题 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="editResourceName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editResourceShareLink" class="form-label">分享链接</label>
+                                <input type="text" class="form-control" id="editResourceShareLink" readonly>
+                            </div>
+                            <div class="mb-3 d-none">
+                                <label for="editResourceCloudName" class="form-label">云盘名称</label>
+                                <input type="text" class="form-control" id="editResourceCloudName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editResourceType" class="form-label">类型（可选，默认不设置）</label>
+                                {{ resource_type_select('editResourceType') }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="editResourceRemarks" class="form-label">备注（可选，默认不设置）</label>
+                                <textarea class="form-control" id="editResourceRemarks" rows="2"></textarea>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm" id="updateResourceBtn">
+                        <i class="fas fa-save"></i> 保存修改
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 批量添加资源模态框 -->
+    <div class="modal fade" id="batchAddResourceModal" tabindex="-1" aria-labelledby="batchAddResourceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="batchAddResourceModalLabel">批量添加资源（云盘自动检测）</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="batchAddResourceForm">
+                        <fieldset>
+                            <legend>批量资源信息</legend>
+                            <div class="mb-3">
+                            <label for="batchResourceContent" class="form-label">资源内容 <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="batchResourceContent" rows="6" placeholder="请输入资源内容，格式如下：
+标题: 资源标题1
+分享链接: https://example.com/link1
+类型: 视频
+备注: 这是一个示例资源
+
+标题: 资源标题2
+分享链接: https://example.com/link2
+类型: 文档
+备注: 这是另一个示例资源
+" required></textarea >
+                        </div>
+                            <div class="mb-3">
+                                <label for="batchResourceType" class="form-label">类型（可选，默认不设置）</label>
+                                {{ resource_type_select('batchResourceType') }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="batchResourceRemarks" class="form-label">备注（可选，默认不设置）</label>
+                                <textarea class="form-control" id="batchResourceRemarks" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">请勾选网盘，转存并替换成自己的分享链接（可选）</label>
+                                {{ cloud_disk_checkboxes('batchSaveTo') }}
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                    <button type="button" class="btn btn-success btn-sm" id="batchSaveResourceBtn">
+                        <i class="fas fa-save"></i> 批量添加
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast 消息容器 -->
+    <div aria-live="polite" aria-atomic="true" id="toastContainer"></div>
+    
+    <!-- API文档模态框 -->
+    <div class="modal fade" id="apiModal" tabindex="-1" aria-labelledby="apiModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="apiModalLabel">API文档</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>资源搜索接口</h6>
+                    <p><strong>接口地址：</strong> <code>/api</code></p>
+                    <p><strong>请求方法：</strong> GET</p>
+                    <p><strong>参数说明：</strong></p>
+                    <ul>
+                        <li><code>name</code>：按资源名称搜索（可选）</li>
+                        <li><code>cloud_name</code>：按云盘名称搜索（可选）</li>
+                        <li><code>type</code>：按资源类型搜索（可选）</li>
+                        <li><code>limit</code>：返回结果数量限制（默认100）</li>
+                        <li><code>sort</code>：结果排序方式（可选，默认default）
+                            <ul>
+                                <li><code>default</code>：按创建时间倒序</li>
+                                <li><code>asc</code>：按ID正序</li>
+                                <li><code>desc</code>：按ID倒序</li>
+                                <li><code>random</code>：随机排序</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p><strong>返回格式：</strong></p>
+                    <pre><code>{"success": true,
+ "total": 5,
+ "results": [{
+   "id": 1,
+   "name": "资源名称",
+   "share_link": "https://example.com/link",
+   "cloud_name": "百度网盘",
+   "type": "电影",
+   "remarks": "备注信息"
+ }]}</code></pre>
+                    <p><strong>使用示例：</strong></p>
+                    <pre><code>GET /api?name=电影&limit=10
+GET /api?cloud_name=百度网盘&type=软件
+GET /api?name=资源名称&cloud_name=阿里云盘&limit=5
+GET /api?name=资源名称&sort=asc
+GET /api?cloud_name=夸克&sort=random&limit=1
+GET /api?type=音乐&sort=desc</code></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/hot_resource.js') }}"></script>
+{% endblock %}

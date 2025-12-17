@@ -1,0 +1,90 @@
+# routes/search_routes.py
+
+from flask import Blueprint, request, jsonify, Response
+
+import json
+import logging
+
+from src.pan_operator import create_share, del_share
+from src.services.search_service import (
+    generate_search_stream_events,
+    search_resources,
+)
+
+logger = logging.getLogger(__name__)
+
+search_bp = Blueprint("search", __name__)
+
+
+@search_bp.route("/api/search_stream", methods=["GET"])
+def search_stream():
+    """
+    使用 Server-Sent Events (SSE) 实时流式返回搜索结果。
+    """
+    keyword = request.args.get("keyword")
+    if not keyword:
+        return jsonify({"error": "请提供搜索关键词"}), 400
+
+    logger.info(f"用户 SSE 搜索关键词: {keyword}")
+
+    def generate_events():
+        for payload in generate_search_stream_events(keyword):
+            yield f"data: {payload}\n\n"
+
+    return Response(generate_events(), mimetype="text/event-stream")
+
+
+@search_bp.route("/api", methods=["GET"])
+def search_api():
+    """
+    通过名称、云名称或类型搜索资源的API接口
+    """
+    name = request.args.get("name", "", type=str)
+    cloud_name = request.args.get("cloud_name", "", type=str)
+    resource_type = request.args.get("type", "", type=str)
+    limit = request.args.get("limit", 100, type=int)
+    sort = request.args.get("sort", "default")
+
+    success, message, results = search_resources(
+        name=name, cloud_name=cloud_name, resource_type=resource_type, limit=limit, sort=sort
+    )
+
+    if not success:
+        status_code = 400 if "至少需要提供" in message else 500
+        return jsonify({"success": False, "message": message}), status_code
+
+    return jsonify({"success": True, "total": len(results), "results": results})
+
+
+@search_bp.route("/create_share", methods=["POST"])
+def create_share_route():
+    try:
+        share_data = request.get_json()
+        if not share_data:
+            return jsonify({"error": "缺少参数"}), 400
+        result = create_share(share_data)
+        if result:
+            logger.info(f"分享创建成功: {share_data.get('title')}")
+            return jsonify({"message": '分享创建成功', "success": True}), 200
+            logger.warning(f"分享创建失败: {share_data.get('title')}")
+            return jsonify({"error": "分享创建失败"}), 500
+    except Exception as e:
+        logger.error(f"创建分享时发生未知错误: {str(e)}", exc_info=True)
+        return jsonify({"error": f"发生未知错误: {str(e)}"}), 500
+
+
+@search_bp.route("/del_share", methods=["POST"])
+def del_share_route():
+    try:
+        share_data = request.get_json()
+        if not share_data:
+            return jsonify({"error": "缺少参数"}), 400
+        result = del_share(share_data)
+        if result:
+            logger.info(f"分享删除成功: URL={share_data.get('share_url')}")
+            return jsonify({"message": "分享删除成功", "success": True}), 200
+            logger.warning(f"分享删除失败: URL={share_data.get('share_url')}")
+            return jsonify({"error": "分享删除失败"}), 500
+    except Exception as e:
+        logger.error(f"删除分享时发生未知错误: {str(e)}", exc_info=True)
+        return jsonify({"error": f"发生未知错误: {str(e)}"}), 500
