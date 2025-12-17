@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="static/images/search_logo.png" width="120" height="auto" alt="小青搜剧 Logo">
+
 # 🚀 小青搜剧 (search-ucmao)
 
 **全能网盘推广与自动化变现管理系统**
@@ -182,7 +184,7 @@ search_ucmao/
 
 ## ⚖️ 开源协议 & 免责声明
 
-1. 本项目基于 **[LICENSE](LICENSE)** 协议开源。
+1. 本项目基于 **[MIT LICENSE](LICENSE)** 协议开源。
 2. **免责声明**：本工具仅供技术交流学习，严禁用于任何非法目的。因使用本工具造成的任何账号封禁或法律风险，均与原作者无关。
 
 ---
