@@ -46,11 +46,11 @@
 
 ## 💾 网盘支持矩阵
 
-| 平台 | 识别状态 | 自动转存/洗白 | 推广优势 |
-| --- | --- | --- | --- |
-| **夸克网盘** | ✅ 识别 | ✅ **完美支持** | 推广佣金高，拉新效果极佳 |
-| **百度网盘** | ✅ 识别 | ✅ **完美支持** | 用户覆盖广，资源转存率高 |
-| **其他14种** | ✅ 识别 | 🚧 持续开发中 | 涵盖UC、迅雷、阿里、悟空、快兔、移动、联通云盘等 |
+| 平台        | 识别状态 | 自动转存/洗白 | 推广优势                                                   |
+|-----------| --- | --- |--------------------------------------------------------|
+| **夸克网盘**  | ✅ 识别 | ✅ **完美支持** | 推广佣金高，拉新效果极佳                                           |
+| **百度网盘**  | ✅ 识别 | ✅ **完美支持** | 用户覆盖广，资源转存率高                                           |
+| **其他10种** | ✅ 识别 | 🚧 持续开发中 | 涵盖UC网盘、迅雷网盘、阿里云盘、悟空网盘、快兔网盘、移动云盘、联通云盘、115网盘、123云盘、天翼云盘等 |
 
 ---
 
@@ -91,6 +91,7 @@ cd search-ucmao
 # 创建虚拟环境
 python3 -m venv venv
 # 激活环境 (Linux/Mac)
+
 source venv/bin/activate
 # 激活环境 (Windows)
 # venv\Scripts\activate
@@ -107,23 +108,23 @@ pip install -r requirements.txt
 
 ### 4. 环境配置 (.env)
 
-在项目根目录下创建 `.env` 文件，填入以下配置：
+将项目根目录的 `.env.example` 文件重命名为 `.env` 文件，填入以下配置：
 
 ```ini
 # 系统密钥 (用于JWT签名)
-SECRET_KEY = your_secret_key_here
+SECRET_KEY = 请替换为你的JWT签名密钥（如随机字符串）
 
 # MYSQL 数据库配置
 DB_HOST = localhost
 DB_PORT = 3306
 DB_DATABASE = ucmao_search
 DB_USER = root
-DB_PASSWORD = your_password_here
+DB_PASSWORD = 请替换为你的MySQL密码
 DB_CHARSET = utf8mb4
 
 # 管理员账号配置
 ADMIN_USERNAME = admin
-ADMIN_PASSWORD = your_admin_password_here
+ADMIN_PASSWORD = 请替换为你的管理员密码
 
 ```
 

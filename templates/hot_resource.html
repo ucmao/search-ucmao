@@ -234,7 +234,17 @@
                                 <textarea class="form-control" id="resourceRemarks" rows="1"></textarea>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">请勾选网盘，转存并替换成自己的分享链接（可选）</label>
+                                <label class="form-label"><strong>转存并入库策略 (高级)</strong></label>
+                                <div class="form-text text-muted mb-2" style="font-size: 0.85rem; line-height: 1.5;">
+                                    <div>
+                                        <i class="bi bi-info-circle"></i> 
+                                        <strong>同盘转存：</strong>若资源链接与勾选网盘匹配，系统将自动转存并生成您的分享链接，<strong>以您的新链接替换原链接</strong>保存入库。
+                                    </div>
+                                    <div class="mt-1 text-warning">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        <strong>前提：</strong>需提前在“配置Cookie”中配置对应网盘的 <strong>Cookie</strong> 才能生效。
+                                    </div>
+                                </div>
                                 {{ cloud_disk_checkboxes('resourceSaveTo') }}
                             </div>
                         </fieldset>
@@ -339,8 +349,18 @@
                                 <textarea class="form-control" id="batchResourceRemarks" rows="1"></textarea>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">请勾选网盘，转存并替换成自己的分享链接（可选）</label>
-                                {{ cloud_disk_checkboxes('batchSaveTo') }}
+                                <label class="form-label"><strong>转存并入库策略 (高级)</strong></label>
+                                <div class="form-text text-muted mb-2" style="font-size: 0.85rem; line-height: 1.5;">
+                                    <div>
+                                        <i class="bi bi-info-circle"></i> 
+                                        <strong>同盘转存：</strong>若资源链接与勾选网盘匹配，系统将自动转存并生成您的分享链接，<strong>以您的新链接替换原链接</strong>保存入库。
+                                    </div>
+                                    <div class="mt-1 text-warning">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        <strong>前提：</strong>需提前在“配置Cookie”中配置对应网盘的 <strong>Cookie</strong> 才能生效。
+                                    </div>
+                                </div>
+                                {{ cloud_disk_checkboxes('resourceSaveTo') }}
                             </div>
                         </fieldset>
                     </form>
@@ -449,5 +469,6 @@ GET /api?type=音乐&sort=desc</code></pre>
 
 {% block scripts %}
     {{ super() }}
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename='js/hot_resource.js') }}"></script>
 {% endblock %}

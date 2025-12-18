@@ -115,42 +115,44 @@
             resize: vertical;
         }
 
-        /* 新增：优化 Fieldset 结构 - 蓝色系（新建） */
+        /* 移除单独色块设计，改为整个模态框背景大色块 */
         fieldset {
-            border: 2px solid;
-            padding: 8px 12px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            background-color: #f8f9fa;
+            border: none;
+            padding: 0;
+            margin-bottom: 16px;
+            background-color: transparent;
         }
 
-        /* 新增：不同模态框的不同配色 */
-        #addApiModal fieldset {
-            border-color: #4dabf7;
+        legend {
+            background: none;
+            border-radius: 0;
+            padding: 0 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            margin-bottom: 8px;
+            margin-left: 16px;
         }
 
         #addApiModal legend {
-            color: #1976d2;
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            border: 1px solid #90caf9;
-        }
-
-        #editApiModal fieldset {
-            border-color: #ffb74d;
+            color: #1d4ed8;
+            font-size: 1.1rem;
         }
 
         #editApiModal legend {
-            color: #f57c00;
-            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-            border-radius: 20px;
-            padding: 4px 12px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            border: 1px solid #ffcc80;
+            color: #b45309;
+            font-size: 1.1rem;
+        }
+
+        /* 为整个modal-body添加大色块背景 */
+        #addApiModal .modal-body {
+            background-color: #eff6ff;
+            padding: 16px;
+        }
+
+        #editApiModal .modal-body {
+            background-color: #fffbeb;
+            padding: 16px;
         }
 
         /* JSON 格式化按钮的样式微调 */

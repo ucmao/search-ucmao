@@ -5,45 +5,7 @@
          * @param {string} message - 提示消息
          * @param {string} type - 提示类型 ('success', 'danger', 'info', 'warning')
          */
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const iconClass = {
-                success: 'fa-check-circle text-success',
-                danger: 'fa-exclamation-triangle text-danger',
-                warning: 'fa-exclamation-circle text-warning',
-                info: 'fa-info-circle text-primary'
-            }[type];
-            const headerColor = {
-                success: 'bg-success text-white',
-                danger: 'bg-danger text-white',
-                warning: 'bg-warning',
-                info: 'bg-primary text-white'
-            }[type];
 
-            const toastHtml = `
-                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
-                    <div class="toast-header ${headerColor}">
-                        <i class="fas ${iconClass} me-2"></i>
-                        <strong class="me-auto">${type === 'success' ? '成功' : type === 'danger' ? '错误' : type === 'warning' ? '警告' : '通知'}</strong>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                </div>
-            `;
-
-            const toastElement = document.createElement('div');
-            toastElement.innerHTML = toastHtml.trim();
-            const toast = new bootstrap.Toast(toastElement.firstChild);
-
-            toastElement.firstChild.addEventListener('hidden.bs.toast', () => {
-                toastElement.remove();
-            });
-
-            container.appendChild(toastElement);
-            toast.show();
-        }
 
         // 新增：格式化 JSON 输入框内容
         function formatJson(textareaId) {
@@ -303,66 +265,62 @@
         // 全部启用所有 API
         async function enableAllApis() {
             const enableAllButton = document.getElementById('enableAllButton');
-            const userConfirmed = confirm('确定要【启用】所有 API 配置吗？（状态异常的API将不会被启用）');
-            if (!userConfirmed) {
-                return;
-            }
-            enableAllButton.disabled = true;
+            if (await showConfirm('确定要【启用】所有 API 配置吗？（状态异常的API将不会被启用）')) {
+                enableAllButton.disabled = true;
 
-            try {
-                const response = await fetch('/api/configs/enable-all', { method: 'PUT' });
+                try {
+                    const response = await fetch('/api/configs/enable-all', { method: 'PUT' });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        throw new Error(errorJson.message || `HTTP error! status: ${response.status}`);
-                    } catch {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        try {
+                            const errorJson = JSON.parse(errorText);
+                            throw new Error(errorJson.message || `HTTP error! status: ${response.status}`);
+                        } catch {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
                     }
-                }
 
-                const data = await response.json();
-                showToast(data.message, 'success');
-                loadApiConfigs();
-            } catch (error) {
-                console.error('全部启用 API 时出错:', error);
-                showToast(`全部启用失败: ${error.message}`, 'danger');
-            } finally {
-                enableAllButton.disabled = false;
+                    const data = await response.json();
+                    showToast(data.message, 'success');
+                    loadApiConfigs();
+                } catch (error) {
+                    console.error('全部启用 API 时出错:', error);
+                    showToast(`全部启用失败: ${error.message}`, 'danger');
+                } finally {
+                    enableAllButton.disabled = false;
+                }
             }
         }
 
         // 全部禁用 API
         async function disableAllApis() {
             const disableAllButton = document.getElementById('disableAllButton');
-            const userConfirmed = confirm('确定要【禁用】所有 API 配置吗？');
-            if (!userConfirmed) {
-                return;
-            }
-            disableAllButton.disabled = true;
+            if (await showConfirm('确定要【禁用】所有 API 配置吗？')) {
+                disableAllButton.disabled = true;
 
-            try {
-                const response = await fetch('/api/configs/disable-all', { method: 'PUT' });
+                try {
+                    const response = await fetch('/api/configs/disable-all', { method: 'PUT' });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        throw new Error(errorJson.message || `HTTP error! status: ${response.status}`);
-                    } catch {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        try {
+                            const errorJson = JSON.parse(errorText);
+                            throw new Error(errorJson.message || `HTTP error! status: ${response.status}`);
+                        } catch {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
                     }
-                }
 
-                const data = await response.json();
-                showToast(data.message, 'success');
-                loadApiConfigs();
-            } catch (error) {
-                console.error('全部禁用 API 时出错:', error);
-                showToast(`全部禁用失败: ${error.message}`, 'danger');
-            } finally {
-                disableAllButton.disabled = false;
+                    const data = await response.json();
+                    showToast(data.message, 'success');
+                    loadApiConfigs();
+                } catch (error) {
+                    console.error('全部禁用 API 时出错:', error);
+                    showToast(`全部禁用失败: ${error.message}`, 'danger');
+                } finally {
+                    disableAllButton.disabled = false;
+                }
             }
         }
 
@@ -471,11 +429,9 @@
             const { api } = getApiConfigById(apiId);
             if (!api) return;
 
-            if (confirm(`确定删除 API "${api.name}" 吗？此操作不可撤销。`)) {
+            if (await showConfirm(`确定删除 API "${api.name}" 吗？此操作不可撤销。`, 'danger')) {
                 try {
-                    const response = await fetch(`/api/configs/${apiId}`, {
-                        method: 'DELETE'
-                    });
+                    const response = await fetch(`/api/configs/${apiId}`, { method: 'DELETE' });
 
                     if (!response.ok) {
                         const errorText = await response.text();
@@ -537,62 +493,59 @@
         // 一键测试所有 API
         async function testAllApis() {
             const testAllButton = document.getElementById('testAllButton');
-            const userConfirmed = confirm('该操作可能会耗时较久，您确定要测试所有 API 吗？（包括已禁止的）');
-            if (!userConfirmed) {
-                return;
-            }
-            testAllButton.disabled = true;
+            if (await showConfirm('该操作可能会耗时较久，您确定要测试所有 API 吗？（包括已禁止的）')) {
+                testAllButton.disabled = true;
 
-            try {
-                const response = await fetch('/api/test-all');
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        throw new Error(errorJson.message || `HTTP error! status: ${response.status}`);
-                    } catch {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                try {
+                    const response = await fetch('/api/test-all');
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        try {
+                            const errorJson = JSON.parse(errorText);
+                            throw new Error(errorJson.message || `HTTP error! status: ${response.status}`);
+                        } catch {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
                     }
+                    const data = await response.json();
+                    showToast(data.message, 'info');
+                    loadApiConfigs();
+                } catch (error) {
+                    console.error('一键测试所有 API 时出错:', error);
+                    showToast(`一键测试所有 API 失败: ${error.message}`, 'danger');
+                } finally {
+                    testAllButton.disabled = false;
                 }
-                const data = await response.json();
-                showToast(data.message, 'info');
-                loadApiConfigs();
-            } catch (error) {
-                console.error('一键测试所有 API 时出错:', error);
-                showToast(`一键测试所有 API 失败: ${error.message}`, 'danger');
-            } finally {
-                testAllButton.disabled = false;
             }
         }
 
         // 复制 API
         async function copyApi(apiId) {
             // 添加确认提示
-            if (!confirm('确定要复制此API配置吗？')) {
-                return; // 用户取消操作
-            }
-            try {
-                const response = await fetch(`/api/configs/copy/${apiId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+            if (await showConfirm('确定要复制此API配置吗？')) {
+                try {
+                    const response = await fetch(`/api/configs/copy/${apiId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        throw new Error(errorJson.message || `HTTP error! status: ${response.status}`);
-                    } catch {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        try {
+                            const errorJson = JSON.parse(errorText);
+                            throw new Error(errorJson.message || `HTTP error! status: ${response.status}`);
+                        } catch {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
                     }
-                }
 
-                const data = await response.json();
-                showToast(data.message, 'success');
-                loadApiConfigs();
-            } catch (error) {
-                console.error('复制 API 配置时出错:', error);
-                showToast(`复制 API 配置失败: ${error.message}`, 'danger');
+                    const data = await response.json();
+                    showToast(data.message, 'success');
+                    loadApiConfigs();
+                } catch (error) {
+                    console.error('复制 API 配置时出错:', error);
+                    showToast(`复制 API 配置失败: ${error.message}`, 'danger');
+                }
             }
         }
 

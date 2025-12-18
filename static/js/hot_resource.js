@@ -72,34 +72,7 @@ function matchNetdiskLink(link) {
 }
 
 // 显示 Toast 消息
-function showToast(message, type = 'success') {
-    const toastContainer = document.getElementById('toastContainer');
-    if (!toastContainer) return;
 
-    // 创建 Toast 元素
-    const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
-    toast.setAttribute('aria-atomic', 'true');
-    toast.style.zIndex = '1060'; // 确保在最上层
-
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    `;
-
-    toastContainer.appendChild(toast);
-    const bootstrapToast = new bootstrap.Toast(toast, { delay: 3000 });
-    bootstrapToast.show();
-
-    // 监听隐藏事件，移除 DOM
-    toast.addEventListener('hidden.bs.toast', () => {
-        toast.remove();
-    });
-}
 
 // ==========================================
 // 4. 数据加载与渲染
@@ -264,20 +237,20 @@ function copyResource(id) {
 
 // 删除资源
 async function deleteResource(id) {
-    if (!confirm('确定要删除这条资源吗？此操作不可恢复。')) return;
+    if (await showConfirm('确定要删除这条资源吗？此操作不可恢复。', 'danger')) {
+        try {
+            const response = await fetch(`/api/resources/${id}`, { method: 'DELETE' });
+            const data = await response.json();
 
-    try {
-        const response = await fetch(`/api/resources/${id}`, { method: 'DELETE' });
-        const data = await response.json();
-
-        if (data.success) {
-            showToast('删除成功');
-            loadResources();
-        } else {
-            showToast(data.message || '删除失败', 'danger');
+            if (data.success) {
+                showToast('删除成功');
+                loadResources();
+            } else {
+                showToast(data.message || '删除失败', 'danger');
+            }
+        } catch (error) {
+            showToast('删除请求失败', 'danger');
         }
-    } catch (error) {
-        showToast('删除请求失败', 'danger');
     }
 }
 
@@ -583,46 +556,46 @@ function exportCurrentPage() {
 }
 
 async function exportAllPages() {
-    if (!confirm('确定要导出全部数据吗？数据量大时可能需要较长时间。')) return;
+    if (await showConfirm('确定要导出全部数据吗？数据量大时可能需要较长时间。')) {
+        const exportBtn = document.getElementById('exportAllPagesBtn');
+        const originalText = exportBtn.innerHTML;
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 导出中...';
 
-    const exportBtn = document.getElementById('exportAllPagesBtn');
-    const originalText = exportBtn.innerHTML;
-    exportBtn.disabled = true;
-    exportBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 导出中...';
+        try {
+            // 先获取第一页以确定总数
+            const searchKeyword = searchInput ? searchInput.value.trim() : '';
+            const res1 = await fetch(`/api/resources?page=1&page_size=${pageSize}&search=${encodeURIComponent(searchKeyword)}`);
+            const data1 = await res1.json();
+            
+            if (!data1.success) throw new Error(data1.message);
 
-    try {
-        // 先获取第一页以确定总数
-        const searchKeyword = searchInput ? searchInput.value.trim() : '';
-        const res1 = await fetch(`/api/resources?page=1&page_size=${pageSize}&search=${encodeURIComponent(searchKeyword)}`);
-        const data1 = await res1.json();
-        
-        if (!data1.success) throw new Error(data1.message);
+            let allItems = [...data1.data.items];
+            const totalP = data1.data.total_pages;
 
-        let allItems = [...data1.data.items];
-        const totalP = data1.data.total_pages;
-
-        if (totalP > 1) {
-            const promises = [];
-            for (let i = 2; i <= totalP; i++) {
-                promises.push(
-                    fetch(`/api/resources?page=${i}&page_size=${pageSize}&search=${encodeURIComponent(searchKeyword)}`)
-                        .then(r => r.json())
-                        .then(d => d.success ? d.data.items : [])
-                );
+            if (totalP > 1) {
+                const promises = [];
+                for (let i = 2; i <= totalP; i++) {
+                    promises.push(
+                        fetch(`/api/resources?page=${i}&page_size=${pageSize}&search=${encodeURIComponent(searchKeyword)}`)
+                            .then(r => r.json())
+                            .then(d => d.success ? d.data.items : [])
+                    );
+                }
+                const results = await Promise.all(promises);
+                results.forEach(items => allItems = allItems.concat(items));
             }
-            const results = await Promise.all(promises);
-            results.forEach(items => allItems = allItems.concat(items));
+
+            const csv = convertToCSV(allItems);
+            downloadCSV(csv, `资源列表_全部_${new Date().toISOString().slice(0, 10)}.csv`);
+            showToast(`成功导出 ${allItems.length} 条数据`);
+
+        } catch (error) {
+            showToast('导出失败: ' + error.message, 'danger');
+        } finally {
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = originalText;
         }
-
-        const csv = convertToCSV(allItems);
-        downloadCSV(csv, `资源列表_全部_${new Date().toISOString().slice(0, 10)}.csv`);
-        showToast(`成功导出 ${allItems.length} 条数据`);
-
-    } catch (error) {
-        showToast('导出失败: ' + error.message, 'danger');
-    } finally {
-        exportBtn.disabled = false;
-        exportBtn.innerHTML = originalText;
     }
 }
 
