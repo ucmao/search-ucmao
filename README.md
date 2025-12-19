@@ -162,7 +162,7 @@ python app.py
 ## 📂 项目结构
 
 ```text
-search_ucmao/
+search-ucmao/
 ├── app.py                # 程序入口
 ├── configs/              # 应用与日志配置
 ├── routes/               # 路由层 (API、认证、搜索、资源管理)

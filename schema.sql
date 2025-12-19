@@ -83,8 +83,8 @@ CREATE TABLE `cookie_config` (
 -- Test data for `resources`
 -- ----------------------------
 INSERT INTO `resources` (`file_id`, `name`, `share_link`, `cloud_name`, `type`, `remarks`) VALUES
-('file_123456', '电影资源分享', 'https://pan.baidu.com/s/1abcdefghijklmnopqrstuvwxyz123456', '百度网盘', '电影', '这是一个电影资源分享'),
-('file_789012', '音乐专辑合集', 'https://www.aliyundrive.com/s/abcdefghijklmnopqrstuvwxyz', '阿里云盘', '音乐', '精选音乐专辑合集'),
-('file_345678', '软件工具包', 'https://pan.quark.cn/s/abcdefghijklmnopqrstuvwxyz123456', '夸克网盘', '软件', '常用软件工具包'),
-('file_901234', '学习资料', 'https://cloud.189.cn/t/abcdefghijklmnopqrstuvwxyz', '天翼云盘', '文档', '学习资料合集'),
-('file_567890', '图片素材', 'https://pan.xunlei.com/s/abcdefghijklmnopqrstuvwxyz', '迅雷网盘', '图片', '高清图片素材集');
+('file_123456', '电影资源分享', 'https://pan.baidu.com/s/test0001', '百度网盘', '电影', '这是一个电影资源分享'),
+('file_789012', '音乐专辑合集', 'https://www.aliyundrive.com/s/test0001', '阿里云盘', '音乐', '精选音乐专辑合集'),
+('file_345678', '软件工具包', 'https://pan.quark.cn/s/test0001', '夸克网盘', '软件', '常用软件工具包'),
+('file_901234', '学习资料', 'https://cloud.189.cn/t/test0001', '天翼云盘', '文档', '学习资料合集'),
+('file_567890', '图片素材', 'https://pan.xunlei.com/s/test0001', '迅雷网盘', '图片', '高清图片素材集');

@@ -298,6 +298,7 @@ async function saveResource() {
         ali: document.getElementById('resourceSaveToAli').checked,
         xunlei: document.getElementById('resourceSaveToXunlei').checked,
         uc: document.getElementById('resourceSaveToUc').checked,
+        wukong: document.getElementById('resourceSaveToWukong').checked,
         // '115' removed based on commented out html, add back if needed
     };
 
@@ -461,11 +462,13 @@ async function batchSaveResources() {
     const commonRemarks = document.getElementById('batchResourceRemarks').value.trim();
 
     const saveToNetdisk = {
-        quark: document.getElementById('batchSaveToQuark').checked,
-        baidu: document.getElementById('batchSaveToBaidu').checked,
-        ali: document.getElementById('batchSaveToAli').checked,
-        xunlei: document.getElementById('batchSaveToXunlei').checked,
-        uc: document.getElementById('batchSaveToUc').checked,
+        quark: document.getElementById('resourceSaveToQuark').checked,
+        baidu: document.getElementById('resourceSaveToBaidu').checked,
+        ali: document.getElementById('resourceSaveToAli').checked,
+        xunlei: document.getElementById('resourceSaveToXunlei').checked,
+        uc: document.getElementById('resourceSaveToUc').checked,
+        wukong: document.getElementById('resourceSaveToWukong').checked,
+        // '115' removed based on commented out html, add back if needed
     };
 
     // 锁定按钮
