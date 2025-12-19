@@ -265,7 +265,7 @@ def insert_resource_simple(resource_data: Dict[str, Any]) -> Tuple[bool, str, Op
 
 
 def update_resource_basic_info(resource_id: int, resource_data: Dict[str, Any]) -> Tuple[bool, str]:
-    """更新资源基础信息（标题、云盘名称、类型和备注）。"""
+    """更新资源基础信息（标题、云盘名称、类型、备注和分享链接）。"""
     conn = get_db_connection()
     if not conn:
         return False, "数据库连接失败"
@@ -279,11 +279,12 @@ def update_resource_basic_info(resource_id: int, resource_data: Dict[str, Any]) 
 
         sql = """
         UPDATE resources
-        SET name = %s, cloud_name = %s, type = %s, remarks = %s
+        SET name = %s, share_link = %s, cloud_name = %s, type = %s, remarks = %s
         WHERE id = %s
         """
         params = (
             resource_data["name"],
+            resource_data.get("share_link", ""),
             resource_data.get("cloud_name", ""),
             resource_data.get("type", ""),
             resource_data.get("remarks", ""),

@@ -354,6 +354,7 @@ async function updateResource() {
 
     const payload = {
         name: document.getElementById('editResourceName').value.trim(),
+        share_link: shareLink,  // 添加分享链接字段
         cloud_name: cloudName,
         type: document.getElementById('editResourceType').value,
         remarks: document.getElementById('editResourceRemarks').value.trim()
@@ -363,7 +364,7 @@ async function updateResource() {
     updateResourceBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 更新中...';
 
     try {
-        const response = await fetch(`/api/resources/${id}`, {
+        const response = await fetch(`/api/resources/${id}`, {  // 这里应该是PUT请求，路径是/api/resources/:id
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
