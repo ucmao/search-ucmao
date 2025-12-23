@@ -180,14 +180,22 @@ search-ucmao/
 
 ---
 
+## 📩 联系作者
+
+如果您在安装、使用过程中遇到问题，或有定制需求，请通过以下方式联系：
+
+* **微信 (WeChat)**：csdnxr
+* **QQ**：294323976
+* **邮箱 (Email)**：leoucmao@gmail.com
+* **Bug反馈**：[GitHub Issues](https://github.com/ucmao/search-ucmao/issues)
+
+---
+
 ## ⚖️ 开源协议 & 免责声明
 
 1. 本项目基于 **[MIT LICENSE](LICENSE)** 协议开源。
 2. **免责声明**：本工具仅供技术交流学习，严禁用于任何非法目的。因使用本工具造成的任何账号封禁或法律风险，均与原作者无关。
 
----
-
 **小青搜剧** - 让每一份网盘资源都为你创造价值。
-[提交 Bug](https://github.com/ucmao/search-ucmao/issues) | [联系作者](mailto:leoucmao@gmail.com)
 
 ---
